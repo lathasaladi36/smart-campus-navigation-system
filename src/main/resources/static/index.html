@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Campus Navigation</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background-image:url("1.jpg"); /* Full-page background changed to 1.jpg */
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+}
+
+/* DARK MODE */
+#themeToggle{
+    display:none;
+}
+
+#themeToggle:checked ~ .wrapper{
+    background:rgba(18,18,18,0.9);
+    color:white;
+}
+
+#themeToggle:checked ~ .wrapper .header{
+    background:rgba(0,0,0,0.8);
+}
+
+#themeToggle:checked ~ .wrapper .left-box{
+    background:rgba(30,30,30,0.9);
+    color:white;
+}
+
+#themeToggle:checked ~ .wrapper .right-box{
+    background:rgba(42,42,42,0.9);
+    color:white;
+}
+
+/* WRAPPER */
+.wrapper{
+    width:90%;
+    margin:30px auto;
+    padding:20px;
+    background:rgba(255,255,255,0.8); /* slightly transparent to see background */
+    border-radius:10px;
+}
+
+/* HEADER */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    background:rgba(0,0,0,0.8);
+    color:white;
+    border-radius:8px;
+}
+
+.nav a{
+    margin-left:20px;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.theme-btn{
+    margin-left:20px;
+    background:white;
+    color:black;
+    padding:5px 10px;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+/* MAIN LAYOUT */
+.main{
+    display:flex;
+    margin-top:20px;
+}
+
+/* LEFT SIDE */
+.left-box{
+    width:30%;
+    padding:15px;
+    text-align:center;
+    background:rgba(255,255,255,0.8);
+    border-radius:10px;
+}
+
+.left-box img{
+    width:120px;
+    margin-bottom:15px;
+}
+
+.left-box input{
+    width:85%;
+    padding:6px;
+    margin:6px 0;
+}
+
+/* Hide radio buttons */
+input[type="radio"]{
+    display:none;
+}
+
+/* Hide all forms */
+.form{
+    display:none;
+}
+
+/* Show correct form */
+#signin:checked ~ .forms .form-signin{
+    display:block;
+}
+
+#signup:checked ~ .forms .form-signup{
+    display:block;
+}
+
+#guest:checked ~ .forms .form-guest{
+    display:block;
+}
+
+/* Buttons */
+.button-group{
+    margin-top:15px;
+}
+
+.button-group label{
+    display:block;
+    padding:8px;
+    margin:6px 0;
+    background:#007bff;
+    color:white;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+/* RIGHT SIDE */
+.right-box{
+    width:70%;
+    margin-left:20px;
+    padding:15px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.8); /* semi-transparent to show 1.jpg */
+}
+
+/* SEARCH BOX */
+.search-box{
+    padding:15px;
+    margin-bottom:20px;
+    background:rgba(255,255,255,0.7);
+    border-radius:8px;
+}
+
+.search-box input{
+    width:75%;
+    padding:8px;
+    margin-right:5px;
+}
+
+.search-box button{
+    padding:8px 12px;
+    cursor:pointer;
+    background:#007bff;
+    color:white;
+    border:none;
+    border-radius:5px;
+}
+
+/* MAP BOX */
+.map-box{
+    height:400px;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.map-box iframe{
+    width:100%;
+    height:100%;
+    border:none; /* remove border */
+}
+</style>
+</head>
+
+<body>
+
+<!-- Dark Mode Toggle -->
+<input type="checkbox" id="themeToggle">
+
+<div class="wrapper">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Smart Campus Navigation</h2>
+        <div class="nav">
+            <a href="#">Home</a>
+            <a href="#">Contact</a>
+            <label for="themeToggle" class="theme-btn">Dark / Light</label>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- LEFT SIDE -->
+        <div class="left-box">
+
+            <img src="2.png" alt="Logo">
+
+            <!-- Radio Controls -->
+            <input type="radio" name="form" id="signin" checked>
+            <input type="radio" name="form" id="signup">
+            <input type="radio" name="form" id="guest">
+
+            <!-- FORMS -->
+            <div class="forms">
+
+                <!-- SIGN IN -->
+                <div class="form form-signin">
+                    <h3>Sign In</h3>
+                    <input type="text" placeholder="Student ID">
+                    <input type="password" placeholder="Password">
+                </div>
+
+                <!-- SIGN UP -->
+                <div class="form form-signup">
+                    <h3>Student Sign Up</h3>
+                    <input type="text" placeholder="Full Name">
+                    <input type="text" placeholder="Student ID">
+                    <input type="email" placeholder="Mail ID">
+                    <input type="text" placeholder="Contact Number">
+                    <input type="password" placeholder="Password">
+                </div>
+
+                <!-- GUEST -->
+                <div class="form form-guest">
+                    <h3>Guest User</h3>
+                    <p>No login required</p>
+                </div>
+
+            </div>
+
+            <!-- BUTTONS BELOW DETAILS -->
+            <div class="button-group">
+                <label for="signin" onclick="handleSignIn()">Sign In</label>
+                <label for="signup" onclick="handleSignUp()">Sign Up</label>
+                <label for="guest">Guest User</label>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="right-box">
+
+            <div class="search-box">
+                <h3>Search Directions</h3>
+                <input type="text" id="locationInput" placeholder="Enter a location...">
+                <button onclick="searchLocation()">Search</button>
+            </div>
+
+            <div class="map-box">
+                <iframe id="mapFrame" src="https://www.google.com/maps?q=University&output=embed"></iframe>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+        // --- 1. STUDENT SIGN UP FUNCTION ---
+        async function handleSignUp() {
+        // Collect data from the Sign Up form fields
+        const fullName = document.querySelector('.form-signup input[placeholder="Full Name"]').value;
+        const studentId = document.querySelector('.form-signup input[placeholder="Student ID"]').value;
+        const email = document.querySelector('.form-signup input[placeholder="Mail ID"]').value;
+        const contactNumber = document.querySelector('.form-signup input[placeholder="Contact Number"]').value;
+        const password = document.querySelector('.form-signup input[placeholder="Password"]').value;
+
+        if (!studentId || !password) {
+        alert("Student ID and Password are required for Sign Up!");
+        return;
+    }
+
+        try {
+        const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, studentId, email, contactNumber, password })
+    });
+
+        if (response.ok) {
+        alert("Registration Successful! Now please Sign In.");
+        document.getElementById('signin').checked = true; // Switch UI to Sign In tab
+    } else {
+        const errorMsg = await response.text();
+        alert("Registration Error: " + errorMsg);
+    }
+    } catch (err) {
+        alert("Could not connect to the server. Make sure IntelliJ is running.");
+    }
+    }
+
+        // --- 2. STUDENT SIGN IN FUNCTION ---
+        async function handleSignIn() {
+        const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
+        const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
+
+        if (!studentId || !password) {
+        alert("Please enter both Student ID and Password to Sign In");
+        return;
+    }
+
+        try {
+        const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, password })
+    });
+
+        if (response.ok) {
+        alert("Sign-in Successful! Welcome back.");
+        // Logic to hide login box and show the map fully
+        document.querySelector('.left-box').style.display = 'none';
+        document.querySelector('.right-box').style.width = '100%';
+    } else {
+        const errorMsg = await response.text();
+        alert("Login Failed: " + errorMsg);
+    }
+    } catch (error) {
+        alert("Server error. Check your connection to the Spring Boot backend.");
+    }
+    }
+
+        // --- 3. MAP SEARCH FUNCTION ---
+        function searchLocation() {
+        const location = document.getElementById('locationInput').value;
+        if (location) {
+        const mapFrame = document.getElementById('mapFrame');
+        // Using encodeURIComponent to handle spaces and special characters in the search
+        mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+    }
+    }
+</script>
+
+</body>
+</html>
