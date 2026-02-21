@@ -2,6 +2,8 @@ package edu.smartcampus.smartcampusnavigation.controller;
 
 import edu.smartcampus.smartcampusnavigation.model.Student;
 import edu.smartcampus.smartcampusnavigation.repository.StudentRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*") // Allows your HTML file to connect
 public class AuthController {
 
+    private static final Logger log = LogManager.getLogger(AuthController.class);
     @Autowired
     private StudentRepository studentRepository;
 
@@ -31,8 +34,11 @@ public class AuthController {
         Optional<Student> student = studentRepository.findById(loginRequest.getStudentId());
 
         if (student.isPresent() && student.get().getPassword().equals(loginRequest.getPassword())) {
-            return ResponseEntity.ok("Sign In Successful");
+            log.info("Success");
+            return ResponseEntity.ok("Success");
+
         }
+        log.info("Invalid ID or Password");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid ID or Password");
     }
 }

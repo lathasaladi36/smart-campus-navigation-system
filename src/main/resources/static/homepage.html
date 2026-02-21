@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Smart Campus Navigation</title>
-
+    <link rel="stylesheet"  href="styles.css">
 <style>
 body{
     margin:0;
@@ -273,67 +273,86 @@ input[type="radio"]{
 <script>
         // --- 1. STUDENT SIGN UP FUNCTION ---
         async function handleSignUp() {
-        // Collect data from the Sign Up form fields
-        const fullName = document.querySelector('.form-signup input[placeholder="Full Name"]').value;
-        const studentId = document.querySelector('.form-signup input[placeholder="Student ID"]').value;
-        const email = document.querySelector('.form-signup input[placeholder="Mail ID"]').value;
-        const contactNumber = document.querySelector('.form-signup input[placeholder="Contact Number"]').value;
-        const password = document.querySelector('.form-signup input[placeholder="Password"]').value;
+            const fullName = document.querySelector('.form-signup input[placeholder="Full Name"]').value;
+            const studentId = document.querySelector('.form-signup input[placeholder="Student ID"]').value;
+            const email = document.querySelector('.form-signup input[placeholder="Mail ID"]').value;
+            const contactNumber = document.querySelector('.form-signup input[placeholder="Contact Number"]').value;
+            const password = document.querySelector('.form-signup input[placeholder="Password"]').value;
 
-        if (!studentId || !password) {
-        alert("Student ID and Password are required for Sign Up!");
-        return;
-    }
+            // 1. Check for empty fields
+            if (!fullName || !studentId || !email || !contactNumber || !password) {
+                alert("All fields are required!");
+                return;
+            }
 
-        try {
-        const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, studentId, email, contactNumber, password })
-    });
+            // 2. Validate Phone Number (must be exactly 10 digits)
+            const phonePattern = /^\d{10}$/;
+            if (!phonePattern.test(contactNumber)) {
+                alert("Please enter a valid 10-digit phone number.");
+                return;
+            }
 
-        if (response.ok) {
-        alert("Registration Successful! Now please Sign In.");
-        document.getElementById('signin').checked = true; // Switch UI to Sign In tab
-    } else {
-        const errorMsg = await response.text();
-        alert("Registration Error: " + errorMsg);
-    }
-    } catch (err) {
-        alert("Could not connect to the server. Make sure IntelliJ is running.");
-    }
-    }
+            // 3. Validate Password Strength (Min 8 characters)
+            if (password.length < 8) {
+                alert("Password is too weak! It must be at least 8 characters long.");
+                return;
+            }
+
+            // 4. Validate Email Format (Basic check)
+            if (!email.includes("@")) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+
+            // If all checks pass, proceed to fetch
+            try {
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, studentId, email, contactNumber, password })
+                });
+
+                if (response.ok) {
+                    alert("Registration Successful!");
+                    document.getElementById('signin').checked = true;
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Error: " + errorMsg);
+                }
+            } catch (err) {
+                alert("Server error. Check your IntelliJ connection.");
+            }
+        }
 
         // --- 2. STUDENT SIGN IN FUNCTION ---
         async function handleSignIn() {
-        const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
-        const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
+            const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
+            const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
 
-        if (!studentId || !password) {
-        alert("Please enter both Student ID and Password to Sign In");
-        return;
-    }
+            if (!studentId || !password) {
+                alert("Please enter both Student ID and Password to Sign In");
+                return;
+            }
 
-        try {
-        const response = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId, password })
-    });
+            try {
+                const response = await fetch('/api/auth/signin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ studentId, password })
+                });
 
-        if (response.ok) {
-        alert("Sign-in Successful! Welcome back.");
-        // Logic to hide login box and show the map fully
-        document.querySelector('.left-box').style.display = 'none';
-        document.querySelector('.right-box').style.width = '100%';
-    } else {
-        const errorMsg = await response.text();
-        alert("Login Failed: " + errorMsg);
-    }
-    } catch (error) {
-        alert("Server error. Check your connection to the Spring Boot backend.");
-    }
-    }
+                if (response.ok) {
+                    alert("Sign-in Successful! Redirecting to your dashboard...");
+                    // It tells the browser to load your new navigation page.
+                    window.location.href = "navpage.html";
+                } else {
+                    const errorMsg = await response.text();
+                    alert("Login Failed: " + errorMsg);
+                }
+            } catch (error) {
+                alert("Server error. Check your connection to the Spring Boot backend.");
+            }
+        }
 
         // --- 3. MAP SEARCH FUNCTION ---
         function searchLocation() {
