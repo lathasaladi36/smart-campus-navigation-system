@@ -112,8 +112,80 @@ input[type="radio"]{
     display:block;
 }
 
-#guest:checked ~ .forms .form-guest{
-    display:block;
+/* The Forgot Password link */
+.forgot-link {
+    align-self: flex-end; /* Pushes the link to the right */
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: #007bff; /* Standard blue link color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* Hover and Focus states for accessibility */
+.forgot-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.forgot-link:focus {
+    outline: 2px solid #4a90e2;
+    outline-offset: 2px;
+}
+
+.modal {
+    display: none; /* Hidden by default, JS toggles this to 'flex' */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    /* These two lines center the popup box perfectly */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    /* Remove 'margin: 15% auto' as flexbox now handles the centering */
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+}
+
+.success-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+#successView h2 {
+    color: #28a745; /* Success Green */
+    margin-bottom: 10px;
+}
+
+#successView p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Need help Button Styling */
+.help-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #00853E; /* UNT Green */
+    color: white !important; /* Ensure text is white */
+    text-decoration: none; /* Remove the underline */
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
 }
 
 /* Buttons */
