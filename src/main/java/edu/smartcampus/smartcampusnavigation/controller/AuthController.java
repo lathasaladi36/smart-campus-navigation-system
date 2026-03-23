@@ -36,14 +36,14 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<String> login(@RequestBody Student loginRequest) {
+    public ResponseEntity<?> login(@RequestBody Student loginRequest) {
         try {
             Optional<Student> student = studentRepository.findById(loginRequest.getStudentId());
 
             // The .getPassword() usage here connects to your Student class
             if (student.isPresent() && student.get().getPassword().equals(loginRequest.getPassword())) {
                 log.info("Login successful for: {}", loginRequest.getStudentId());
-                return ResponseEntity.ok("Success"); // JavaScript looks for this exact string
+                return ResponseEntity.ok(student.get()); // JavaScript looks for this exact string
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         } catch (Exception e) {

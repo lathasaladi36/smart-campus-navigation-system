@@ -7,10 +7,11 @@
 
 <body>
 <div class="header">
-    <h2>Signed in User</h2>
+    <h2 id="userGreeting">Signed in User</h2>
     <div class="nav">
-        <a href="HomePage (1).html">Home</a>
-        <a href="#">Contact</a>
+        <a href="#" class="help-button" onclick="handleLogout()">Logout</a>
+        <a href="https://transportation.unt.edu/index.html" class="help-button"
+           target="_blank">Contact</a>
     </div>
 </div>
 
@@ -88,11 +89,22 @@
 
     </div>
 
-    <div class="right-box" style="width: 75%;">
+    <div class="right-box" style="width: 95%;">
         <div class="search-box">
             <h3>Campus Map</h3>
-            <input type="text" id="locationInput" placeholder="Search Campus">
-            <button onclick="searchLocation()">Search</button>
+            <div style="width: 110%;">
+                <input type="text" id="locationInput" list="unt-locations" placeholder="Enter a location to search">
+                <datalist id="unt-locations">
+                    <option value="Willis Library, UNT">
+                    <option value="Discovery Park, UNT">
+                    <option value="University Union, UNT">
+                    <option value="Eagle Student Services Center, UNT">
+                    <option value="Coliseum, UNT">
+                    <option value="Pohl Recreation Center, UNT">
+                </datalist>
+                <button onclick="searchLocation()">Search</button>
+                <button onclick="clearSearch()">Clear</button>
+            </div>
         </div>
 
         <div class="map-box">
@@ -105,14 +117,29 @@
 
 <script>
     // Search location function //
-    function searchLocation(predefinedLocation) {
+    function searchLocation() {
         const input = document.getElementById('locationInput');
-        const location = predefinedLocation || input.value;
-
-        if(location) {
+        const location = input.value;
+        if(location)
+        {
             const mapFrame = document.getElementById('mapFrame');
-            mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+            const embedUrl = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+            mapFrame.src = embedUrl;
+            console.log("Searching for:", location);
         }
+        else
+        {
+            alert("Please enter a location to search.");
+        }
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('locationInput');
+        input.value = ""; // Empty the text box
+
+        // Manually trigger the reset logic
+        const mapFrame = document.getElementById('mapFrame');
+        mapFrame.src = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13388.46048106757!2d-97.1477!3d33.2109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864dca889c026b7d%3A0xc6a8043530e00f98!2sUniversity%20of%20North%20Texas!5e0!3m2!1sen!2sus!4v1700000000000";
     }
 
     // Switch campus function //
@@ -125,6 +152,42 @@
             mapFrame.src = "https://www.google.com/maps?q=Discovery+Park+UNT+Denton&output=embed";
         }
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const savedName = localStorage.getItem("username");
+        if (savedName) {
+            document.getElementById("userGreeting").innerText = "Hello, " + savedName;
+        }
+    });
+
+    function handleLogout() {
+        // 1. Clear the specific 'username' key from memory
+        localStorage.removeItem("username");
+
+        // 2. (Optional) Clear everything if you have other session data
+        // localStorage.clear();
+
+        // 3. Redirect back to the login page
+        alert("You have been logged out.");
+        window.location.href = "homepage.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const locationInput = document.getElementById('locationInput');
+        const mapFrame = document.getElementById('mapFrame');
+
+        // The "Standard" UNT Map URL (copy this from your initial iframe src)
+        const standardMap = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13388.46048106757!2d-97.1477!3d33.2109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864dca889c026b7d%3A0xc6a8043530e00f98!2sUniversity%20of%20North%20Texas!5e0!3m2!1sen!2sus!4v1700000000000";
+
+        locationInput.addEventListener('input', function() {
+            // If the search bar is empty, reset the map
+            if (this.value.trim() === "") {
+                mapFrame.src = standardMap;
+                console.log("Search cleared - Map reset to default.");
+            }
+        });
+    });
+
 </script>
 
 </body>

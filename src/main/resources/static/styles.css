@@ -7,30 +7,6 @@ body {
     background-repeat:no-repeat;
 }
 
-/* DARK MODE */
-#themeToggle{
-    display:none;
-}
-
-#themeToggle:checked ~ .wrapper{
-    background:rgba(18,18,18,0.9);
-    color:white;
-}
-
-#themeToggle:checked ~ .wrapper .header{
-    background:rgba(0,0,0,0.8);
-}
-
-#themeToggle:checked ~ .wrapper .left-box{
-    background:rgba(30,30,30,0.9);
-    color:white;
-}
-
-#themeToggle:checked ~ .wrapper .right-box{
-    background:rgba(42,42,42,0.9);
-    color:white;
-}
-
 /* WRAPPER */
 .wrapper{
     width:90%;
@@ -205,11 +181,15 @@ input[type="radio"]{
 
 /* RIGHT SIDE */
 .right-box{
-    width:70%;
-    margin-left:20px;
+    margin-left:0px;
     padding:15px;
     border-radius:10px;
     background:rgba(255,255,255,0.8); /* semi-transparent to show 1.jpg */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Allow it to grow with content */
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* SEARCH BOX */
@@ -237,16 +217,19 @@ input[type="radio"]{
 
 /* MAP BOX */
 .map-box{
-    height:400px;
+    height: 600px;
     border-radius:10px;
     overflow:hidden;
     color: black;
+    flex-grow: 1;
+    position: relative;
 }
 
 .map-box iframe{
     width:100%;
     height:100%;
     border:none; /* remove border */
+    display: block;
 }
 
 
@@ -258,12 +241,27 @@ input[type="radio"]{
     padding: 2rem;
     max-width: 1600px;
     margin: 0 auto;
+    height: calc(100vh - 120px); /* Adjusts for header height */
+    overflow: hidden; /* Keeps the whole page from scrolling */
 }
 
 .left-panel {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    overflow-y: auto; /* Adds scrollbar when content overflows */
+    padding-right: 10px; /* Space for the scrollbar */
+    height: 100%;
+}
+
+/* Optional: Make the scrollbar look cleaner */
+.left-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-thumb {
+    background: #00853E; /* UNT Green */
+    border-radius: 10px;
 }
 
 .right-panel {

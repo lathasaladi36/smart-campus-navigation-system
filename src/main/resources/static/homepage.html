@@ -194,11 +194,6 @@
     <!-- HEADER -->
     <div class="header">
         <h2>UNT Campus Navigation</h2>
-        <div class="nav">
-            <a href="https://transportation.unt.edu/index.html" class="help-button"
-               target="_blank" rel="noopener noreferrer">Need Help?</a>
-            <label for="themeToggle" class="theme-btn">Dark / Light</label>
-        </div>
     </div>
 
     <!-- MAIN -->
@@ -269,6 +264,11 @@
             <div class="button-group">
                 <label for="signin" onclick="handleSignIn()">Sign In</label>
                 <label for="signup" onclick="handleSignUp()">Sign Up</label>
+
+                <div class="nav">
+                    <a href="https://transportation.unt.edu/index.html" class="help-button"
+                       target="_blank" rel="noopener noreferrer">Need Help?</a>
+                </div>
             </div>
 
         </div>
@@ -364,6 +364,12 @@
             });
 
             if (response.ok) {
+               // 1. Parse the student object from the response
+                const studentData = await response.json();
+
+                // 2. Save the ACTUAL full name to localStorage
+                localStorage.setItem("username", studentData.fullName);
+
                 alert("Sign-in Successful! Redirecting to your dashboard...");
                 // It tells the browser to load your new navigation page.
                 window.location.href = "navpage.html";
