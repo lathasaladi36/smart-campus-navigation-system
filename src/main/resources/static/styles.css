@@ -15,6 +15,34 @@ body {
     background:rgba(255,255,255,0.8); /* slightly transparent to see background */
     border-radius:10px;
 }
+/* Warning Popup Style */
+#warningPopup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    background: #fff3cd; /* Warning Yellow */
+    color: #856404;
+    padding: 15px 25px;
+    border: 2px solid #ffeeba;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 10001;
+    text-align: center;
+    font-weight: bold;
+}
+
+#warningPopup button {
+    margin-top: 10px;
+    background: #856404;
+    color: white;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 
 /* HEADER */
 .header{

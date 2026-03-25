@@ -348,39 +348,42 @@
 
     // --- 2. STUDENT SIGN IN FUNCTION ---
     async function handleSignIn() {
-        const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
-        const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
+    const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
+    const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
 
-        if (!studentId || !password) {
-            alert("Please enter both Student ID and Password to Sign In");
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/auth/signin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ studentId, password })
-            });
-
-            if (response.ok) {
-               // 1. Parse the student object from the response
-                const studentData = await response.json();
-
-                // 2. Save the ACTUAL full name to localStorage
-                localStorage.setItem("username", studentData.fullName);
-
-                alert("Sign-in Successful! Redirecting to your dashboard...");
-                // It tells the browser to load your new navigation page.
-                window.location.href = "navpage.html";
-            } else {
-                const errorMsg = await response.text();
-                alert("Login Failed: " + errorMsg);
-            }
-        } catch (error) {
-            alert("Server error. Check your connection to the Spring Boot backend.");
-        }
+    if (!studentId || !password) {
+        alert("Please enter both Student ID and Password to Sign In");
+        return;
     }
+
+    try {
+        const response = await fetch('/api/auth/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, password })
+        });
+
+        if (response.ok) {
+            // 1. Parse the JSON object from the response
+            const studentData = await response.json();
+
+            // 2. Save the SPECIFIC fullName property to localStorage
+            // This ensures navpage.html can find the name later
+            localStorage.setItem("username", studentData.fullName);
+
+            // 3. Update the alert to show only the Name, not the whole object
+            alert("Welcome, " + studentData.fullName);
+
+            // 4. Redirect to your navigation page
+            window.location.href = "navpage.html";
+        } else {
+            const errorMsg = await response.text();
+            alert("Login Failed: " + errorMsg);
+        }
+    } catch (error) {
+        alert("Server error. Check your connection to the Spring Boot backend.");
+    }
+}
 
     // --- 3. MAP SEARCH FUNCTION ---
     function searchLocation() {
