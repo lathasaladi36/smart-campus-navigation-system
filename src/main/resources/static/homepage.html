@@ -185,7 +185,13 @@
 </head>
 
 <body>
-
+<div id="customAlertModal" class="modal">
+    <div class="modal-content" style="text-align: center; border: 3px solid #00853E;">
+        <h3 id="alertTitle" style="color: #00853E; margin-top: 0;">Notification</h3>
+        <p id="alertMessage"></p>
+        <button onclick="closeCustomAlert()" class="help-button" style="margin-top: 15px;">OK</button>
+    </div>
+</div>
 <!-- Dark Mode Toggle -->
 <input type="checkbox" id="themeToggle">
 
@@ -293,198 +299,211 @@
 </div>
 
 <script>
-    // --- 1. STUDENT SIGN UP FUNCTION ---
-    async function handleSignUp() {
-        const fullName = document.querySelector('.form-signup input[placeholder="Full Name"]').value;
-        const studentId = document.querySelector('.form-signup input[placeholder="Student ID"]').value;
-        const email = document.querySelector('.form-signup input[placeholder="Mail ID"]').value;
-        const contactNumber = document.querySelector('.form-signup input[placeholder="Contact Number"]').value;
-        const password = document.querySelector('.form-signup input[placeholder="Password"]').value;
 
-        // 1. Check for empty fields
-        if (!fullName || !studentId || !email || !contactNumber || !password) {
-            alert("All fields are required!");
-            return;
-        }
-
-        // 2. Validate Phone Number (must be exactly 10 digits)
-        const phonePattern = /^\d{10}$/;
-        if (!phonePattern.test(contactNumber)) {
-            alert("Please enter a valid 10-digit phone number.");
-            return;
-        }
-
-        // 3. Validate Password Strength (Min 8 characters)
-        if (password.length < 8) {
-            alert("Password is too weak! It must be at least 8 characters long.");
-            return;
-        }
-
-        // 4. Validate Email Format (Basic check)
-        if (!email.includes("@")) {
-            alert("Please enter a valid email address.");
-            return;
-        }
-
-        // If all checks pass, proceed to fetch
-        try {
-            const response = await fetch('/api/auth/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullName, studentId, email, contactNumber, password })
-            });
-
-            if (response.ok) {
-                alert("Registration Successful!");
-                document.getElementById('signin').checked = true;
-            } else {
-                const errorMsg = await response.text();
-                alert("Error: " + errorMsg);
-            }
-        } catch (err) {
-            alert("Server error. Check your IntelliJ connection.");
-        }
-    }
-
-    // --- 2. STUDENT SIGN IN FUNCTION ---
-    async function handleSignIn() {
-    const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
-    const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
-
-    if (!studentId || !password) {
-        alert("Please enter both Student ID and Password to Sign In");
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/auth/signin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ studentId, password })
-        });
-
-        if (response.ok) {
-            // 1. Parse the JSON object from the response
-            const studentData = await response.json();
-
-            // 2. Save the SPECIFIC fullName property to localStorage
-            // This ensures navpage.html can find the name later
-            localStorage.setItem("username", studentData.fullName);
-
-            // 3. Update the alert to show only the Name, not the whole object
-            alert("Welcome, " + studentData.fullName);
-
-            // 4. Redirect to your navigation page
-            window.location.href = "navpage.html";
-        } else {
-            const errorMsg = await response.text();
-            alert("Login Failed: " + errorMsg);
-        }
-    } catch (error) {
-        alert("Server error. Check your connection to the Spring Boot backend.");
-    }
+    function showCustomAlert(message, title = "Notification") {
+   document.getElementById('alertTitle').innerText = title;
+   document.getElementById('alertMessage').innerText = message;
+   document.getElementById('customAlertModal').style.display = 'flex';
 }
 
-    // --- 3. MAP SEARCH FUNCTION ---
-    function searchLocation() {
-        const location = document.getElementById('locationInput').value;
-        if (location) {
-            const mapFrame = document.getElementById('mapFrame');
-            // Using encodeURIComponent to handle spaces and special characters in the search
-            mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
-        }
-    }
+function closeCustomAlert() {
+   document.getElementById('customAlertModal').style.display = 'none';
+}
+   // --- 1. STUDENT SIGN UP FUNCTION ---
+   async function handleSignUp() {
+       const fullName = document.querySelector('.form-signup input[placeholder="Full Name"]').value;
+       const studentId = document.querySelector('.form-signup input[placeholder="Student ID"]').value;
+       const email = document.querySelector('.form-signup input[placeholder="Mail ID"]').value;
+       const contactNumber = document.querySelector('.form-signup input[placeholder="Contact Number"]').value;
+       const password = document.querySelector('.form-signup input[placeholder="Password"]').value;
 
-    //----3. Forgot Password for Users ----
-    const modal = document.getElementById("forgotPasswordModal");
-    const forgotLink = document.querySelector(".forgot-link");
-    const closeBtn = document.querySelector(".close-btn");
+       // 1. Check for empty fields
+       if (!fullName || !studentId || !email || !contactNumber || !password) {
+           showCustomAlert("All fields are required!");
+           return;
+       }
 
-    // ---Add the Event Listener to the link----
-    forgotLink.addEventListener("click", function(event) {
-        event.preventDefault();    // Prevents the browser from following the "/forgot-password" URL
-        modal.style.display = "flex"; // Shows the popup (using flex helps with centering)
-    });
+       // 2. Validate Phone Number (must be exactly 10 digits)
+       const phonePattern = /^\d{10}$/;
+       if (!phonePattern.test(contactNumber)) {
+           showCustomAlert("Please enter a valid 10-digit phone number.");
+           return;
+       }
 
-    //--- Add Event Listener to close button---
-    closeBtn.addEventListener("click", function() {
-        modal.style.display = "none";
-    });
+       // 3. Validate Password Strength (Min 8 characters)
+       if (password.length < 8) {
+           showCustomAlert("Password is too weak! It must be at least 8 characters long.");
+           return;
+       }
 
-    //---Close if user clicks outside the modal content---
-    window.addEventListener("click", function(event) {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
+       // 4. Validate Email Format (Basic check)
+       if (!email.includes("@")) {
+           showCustomAlert("Please enter a valid email address.");
+           return;
+       }
 
-    //---Forgot Password Link Success Message---
-    // Wait for the document to be fully loaded
-    document.addEventListener("DOMContentLoaded", function() {
+       // If all checks pass, proceed to fetch
+       try {
+           const response = await fetch('/api/auth/signup', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ fullName, studentId, email, contactNumber, password })
+           });
 
-        // 1. Initialize EmailJS
-        emailjs.init("kTiq8VdYfrMio653R");
+           if (response.ok) {
+               showCustomAlert("Registration Successful!");
+               document.getElementById('signin').checked = true;
+           } else {
+               const errorMsg = await response.text();
+               showCustomAlert("Error: " + errorMsg);
+           }
+       } catch (err) {
+           showCustomAlert("Server error. Check your IntelliJ connection.");
+       }
+   }
 
-        // 2. Select Elements
-        const forgotForm = document.getElementById("forgotPasswordForm");
-        const resetFormView = document.getElementById("resetFormView");
-        const successView = document.getElementById("successView");
-        const displayEmail = document.getElementById("displayEmail");
-        const modal = document.getElementById("forgotPasswordModal");
-        const forgotLink = document.querySelector(".forgot-link");
-        const closeBtn = document.querySelector(".close-btn");
 
-        // 3. Open Modal Logic
-        if(forgotLink) {
-            forgotLink.addEventListener("click", (e) => {
-                e.preventDefault();
-                modal.style.display = "flex";
-            });
-        }
+   // --- 2. STUDENT SIGN IN FUNCTION ---
+   async function handleSignIn() {
+   const studentId = document.querySelector('.form-signin input[placeholder="Student ID"]').value;
+   const password = document.querySelector('.form-signin input[placeholder="Password"]').value;
 
-        // 4. Form Submission Logic
-        if (forgotForm) {
-            forgotForm.addEventListener("submit", async function(e) {
-                e.preventDefault();
-                const emailInput = document.getElementById("resetEmail");
-                const submitBtn = forgotForm.querySelector(".reset-submit");
+   if (!studentId || !password) {
+       showCustomAlert("Please enter both Student ID and Password to Sign In");
+       return;
+   }
 
-                submitBtn.innerText = "Verifying...";
-                submitBtn.disabled = true;
+   try {
+       const response = await fetch('/api/auth/signin', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ studentId, password })
+       });
 
-                try {
-                    // 1. Verify if user exists in the Student table
-                    const verifyResponse = await fetch(`/api/auth/verify-email?email=${emailInput.value}`, {
-                        method: 'POST'
-                    });
+       if (response.ok) {
+           // 1. Parse the JSON object from the response
+           const studentData = await response.json();
 
-                    if (verifyResponse.ok) {
-                        // 2. User exists! Now send the email via EmailJS
-                        const templateParams = {
-                            to_email: emailInput.value,
-                            reset_link: "https://myapp.com/reset?token=" + Math.random().toString(36).substring(7)
-                        };
+           // 2. Save the SPECIFIC fullName property to localStorage
+           // This ensures navpage.html can find the name later
+           localStorage.setItem("username", studentData.fullName);
 
-                        await emailjs.send('service_6ugpbvz', 'template_ca78xdn', templateParams);
+           // 3. Update the alert to show only the Name, not the whole object
+           showCustomAlert("Welcome, " + studentData.fullName, "Sign-in Successful");
 
-                        // Show success view
-                        displayEmail.textContent = emailInput.value;
-                        resetFormView.style.display = "none";
-                        successView.style.display = "block";
-                    } else {
-                        // 3. User doesn't exist! Show popup/alert
-                        alert("User doesn't exist. Please register first.");
-                        submitBtn.innerText = "Send Reset Link";
-                        submitBtn.disabled = false;
-                    }
-                } catch (error) {
-                    alert("Server error. Please ensure your Spring Boot app is running.");
-                    submitBtn.innerText = "Send Reset Link";
-                    submitBtn.disabled = false;
-                }
-            });
-        }
-    });
+           // 4. Redirect to your navigation page
+           setTimeout(() => {
+        window.location.href = "navpage.html";
+    }, 2000);
+       } else {
+           const errorMsg = await response.text();
+           alert("Login Failed: " + errorMsg);
+       }
+   } catch (error) {
+       alert("Server error. Check your connection to the Spring Boot backend.");
+   }
+}
+
+   // --- 3. MAP SEARCH FUNCTION ---
+   function searchLocation() {
+       const location = document.getElementById('locationInput').value;
+       if (location) {
+           const mapFrame = document.getElementById('mapFrame');
+           // Using encodeURIComponent to handle spaces and special characters in the search
+           mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+       }
+   }
+
+   //----3. Forgot Password for Users ----
+   const modal = document.getElementById("forgotPasswordModal");
+   const forgotLink = document.querySelector(".forgot-link");
+   const closeBtn = document.querySelector(".close-btn");
+
+   // ---Add the Event Listener to the link----
+   forgotLink.addEventListener("click", function(event) {
+       event.preventDefault();    // Prevents the browser from following the "/forgot-password" URL
+       modal.style.display = "flex"; // Shows the popup (using flex helps with centering)
+   });
+
+   //--- Add Event Listener to close button---
+   closeBtn.addEventListener("click", function() {
+       modal.style.display = "none";
+   });
+
+   //---Close if user clicks outside the modal content---
+   window.addEventListener("click", function(event) {
+       if (event.target === modal) {
+           modal.style.display = "none";
+       }
+   });
+
+   //---Forgot Password Link Success Message---
+   // Wait for the document to be fully loaded
+   document.addEventListener("DOMContentLoaded", function() {
+
+       // 1. Initialize EmailJS
+       emailjs.init("kTiq8VdYfrMio653R");
+
+       // 2. Select Elements
+       const forgotForm = document.getElementById("forgotPasswordForm");
+       const resetFormView = document.getElementById("resetFormView");
+       const successView = document.getElementById("successView");
+       const displayEmail = document.getElementById("displayEmail");
+       const modal = document.getElementById("forgotPasswordModal");
+       const forgotLink = document.querySelector(".forgot-link");
+       const closeBtn = document.querySelector(".close-btn");
+
+       // 3. Open Modal Logic
+       if(forgotLink) {
+           forgotLink.addEventListener("click", (e) => {
+               e.preventDefault();
+               modal.style.display = "flex";
+           });
+       }
+
+       // 4. Form Submission Logic
+       if (forgotForm) {
+           forgotForm.addEventListener("submit", async function(e) {
+               e.preventDefault();
+               const emailInput = document.getElementById("resetEmail");
+               const submitBtn = forgotForm.querySelector(".reset-submit");
+
+               submitBtn.innerText = "Verifying...";
+               submitBtn.disabled = true;
+
+               try {
+                   // 1. Verify if user exists in the Student table
+                   const verifyResponse = await fetch(`/api/auth/verify-email?email=${emailInput.value}`, {
+                       method: 'POST'
+                   });
+
+                   if (verifyResponse.ok) {
+                       // 2. User exists! Now send the email via EmailJS
+                       const templateParams = {
+                           to_email: emailInput.value,
+                           reset_link: "https://myapp.com/reset?token=" + Math.random().toString(36).substring(7)
+                       };
+
+                       await emailjs.send('service_6ugpbvz', 'template_ca78xdn', templateParams);
+
+                       // Show success view
+                       displayEmail.textContent = emailInput.value;
+                       resetFormView.style.display = "none";
+                       successView.style.display = "block";
+                   } else {
+                       // 3. User doesn't exist! Show popup/alert
+                       alert("User doesn't exist. Please register first.");
+                       submitBtn.innerText = "Send Reset Link";
+                       submitBtn.disabled = false;
+                   }
+               } catch (error) {
+                   alert("Server error. Please ensure your Spring Boot app is running.");
+                   submitBtn.innerText = "Send Reset Link";
+                   submitBtn.disabled = false;
+               }
+           });
+       }
+   });
 </script>
 
 </body>
