@@ -504,6 +504,28 @@ function closeCustomAlert() {
            });
        }
    });
+
+    //Function to store user location
+    window.onload = function() {
+        if (navigator.geolocation) {
+            // This triggers the browser popup on the homepage
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    console.log("Location access granted.");
+                    // Store coordinates so Navpage can read them without asking again
+                    localStorage.setItem("userLat", position.coords.latitude);
+                    localStorage.setItem("userLon", position.coords.longitude);
+                },
+                (error) => {
+                    console.warn("Location access denied or timed out.");
+                    // Clear old data if they deny access
+                    localStorage.removeItem("userLat");
+                    localStorage.removeItem("userLon");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+    };
 </script>
 
 </body>

@@ -120,8 +120,20 @@
             </div>
         </div>
 
-        <div class="map-box">
-            <iframe id="mapFrame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13388.46048106757!2d-97.1477!3d33.2109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864dca889c026b7d%3A0xc6a8043530e00f98!2sUniversity%20of%20North%20Texas!5e0!3m2!1sen!2sus!4v1700000000000"></iframe>
+<!--        <div class="map-box">-->
+<!--            <iframe id="mapFrame" src="https://maps.google.com/maps?q=University+of+North+Texas&output=embed" allowfullscreen></iframe>-->
+<!--        </div>-->
+
+        <div class="map-box" style="position: relative;">
+            <div id="mapWrapper" style="position: relative; width: 100%; height: 100%;">
+
+                <div id="userLocationLabel" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -160%); background: white; color: #00853E; padding: 5px 12px; border-radius: 20px; border: 2px solid #00853E; font-weight: bold; z-index: 10; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 13px;">
+                     You Are Here
+                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid white;"></div>
+                </div>
+
+                <iframe id="mapFrame" src="about:blank" width="100%" height="100%" style="border:0;" allowfullscreen></iframe>
+            </div>
         </div>
 
     </div>
@@ -153,12 +165,17 @@
     document.onclick = resetTimer;
 
     // --- 2. YOUR ORIGINAL FUNCTIONS (NO CHANGES) ---
-    function searchLocation() {
+    function searchLocation(favLocation) {
+        const label = document.getElementById('userLocationLabel');
+        label.style.display = "none"; // Hide the label when looking for a building
+
         const input = document.getElementById('locationInput');
-        const location = input.value;
-        if(location) {
+        const location = favLocation || input.value;
+
+        if(location && location.trim() !== "") {
             const mapFrame = document.getElementById('mapFrame');
-            const embedUrl = `https://www.google.com/maps?q=${encodeURIComponent(location)}&output=embed`;
+            const query = encodeURIComponent(location + " UNT Denton");
+            const embedUrl = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=addr&output=embed`;
             mapFrame.src = embedUrl;
         } else {
             alert("Please enter a location to search.");
@@ -168,14 +185,17 @@
     function clearSearch() {
         const input = document.getElementById('locationInput');
         input.value = "";
-        const mapFrame = document.getElementById('mapFrame');
-        mapFrame.src = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13388.46048106757!2d-97.1477!3d33.2109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864dca889c026b7d%3A0xc6a8043530e00f98!2sUniversity%20of%20North%20Texas!5e0!3m2!1sen!2sus!4v1700000000000";
+        // Resetting shows the user where they are currently standing
+        showUserLocation();
     }
 
     function switchCampus(campus) {
+        document.getElementById('userLocationLabel').style.display = "none";
+
         const mapFrame = document.getElementById('mapFrame');
         if(campus === 'main') {
-            mapFrame.src = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13388.46048106757!2d-97.1477!3d33.2109!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x864dca889c026b7d%3A0xc6a8043530e00f98!2sUniversity%20of%20North%20Texas!5e0!3m2!1sen!2sus!4v1700000000000";
+           const address = encodeURIComponent("Union Campus, 1155 Union Cir, Denton, TX 76205");
+           mapFrame.src = `https://maps.google.com/maps?q=${address}&t=&z=16&ie=UTF8&iwloc=addr&output=embed`;
         } else if(campus === 'discovery') {
             mapFrame.src = "https://www.google.com/maps?q=Discovery+Park+UNT+Denton&output=embed";
         }
@@ -186,12 +206,38 @@
         if (savedName) {
             document.getElementById("userGreeting").innerText = "Hello, " + savedName;
         }
+        showUserLocation();
     });
 
     function handleLogout() {
         localStorage.removeItem("username");
         window.location.href = "homepage.html";
     }
+
+    // Function to center the map on the user's current GPS coordinates
+    function showUserLocation() {
+        const mapFrame = document.getElementById('mapFrame');
+        const label = document.getElementById('userLocationLabel');
+
+        // Retrieve coordinates stored from the homepage
+        const lat = localStorage.getItem("userLat");
+        const lon = localStorage.getItem("userLon");
+
+        if (lat && lon) {
+            // Show the custom "You Are Here" label
+            label.style.display = "block";
+
+            // Center the map and drop the pin exactly on those coordinates
+            const url = `https://maps.google.com/maps?q=${lat},${lon}&q=${lat},${lon}&z=18&output=embed`;
+            mapFrame.src = url;
+        } else {
+            // If they denied on homepage, hide label and show Main Campus default
+            label.style.display = "none";
+            mapFrame.src = "https://maps.google.com/maps?q=University+of+North+Texas&t=&z=16&ie=UTF8&iwloc=&output=embed";
+
+        }
+    }
+
 </script>
 </body>
 </html>
