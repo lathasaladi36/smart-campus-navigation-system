@@ -4,11 +4,22 @@
     <title>Sign in - Nav Page</title>
     <link rel="stylesheet"  href="styles.css">
 </head>
-<div id="sessionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; max-width: 400px; border: 3px solid #00853E;">
-        <h2 style="color: #d9534f; margin-top: 0;">Session Expired</h2>
-        <p>You have been inactive for 10 minutes. For your security, you have been logged out.</p>
-        <button onclick="redirectToLogin()" style="background: #00853E; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Return to Login</button>
+<div id="warningPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10001; justify-content: center; align-items: center;">
+
+    <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 4px solid #00853E; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 400px;">
+
+        <h2 style="color: #d9534f; margin: 0; font-size: 28px;">Session Warning</h2>
+
+        <p style="color: #333; font-size: 16px; margin: 5px 0;">You have been inactive for a while.</p>
+
+        <p style="color: #666; font-size: 14px; margin: 0;">Logging out in:</p>
+
+        <h1 id="countdownDisplay" style="color: #00853E; margin: 10px 0; font-size: 48px;">10:00</h1>
+
+        <button onclick="resetAllTimers()" style="background: #00853E; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px;">
+            I'm Still Here
+        </button>
+
     </div>
 </div>
 <body>
@@ -142,28 +153,62 @@
 
 <script>
     // --- 1. TIMER LOGIC (1 MINUTE FOR TESTING) ---
-    let idleTimer;
-    const timeoutDuration = 1 * 60 * 1000; // 1 Minute
+    let phase1Timer;
+    let phase2Interval;
+    const PHASE_1_TIME = 1 * 60 * 1000; // 1 Minute testing duration
 
-    function resetTimer() {
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(showTimeoutModal, timeoutDuration);
+    function resetAllTimers() {
+        // 1. HIDEP THE POPUP IMMEDIATELY
+        const popup = document.getElementById('warningPopup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+
+        // 2. CLEAR ALL CLOCKS
+        clearTimeout(phase1Timer);
+        clearInterval(phase2Interval);
+
+        // 3. RESTART THE SILENT WAIT
+        phase1Timer = setTimeout(startPhase2Countdown, PHASE_1_TIME);
+        console.log("Activity detected: Popup hidden and timer reset.");
     }
 
-    function showTimeoutModal() {
-        document.getElementById('sessionModal').style.display = 'flex';
+    function startPhase2Countdown() {
+        const popup = document.getElementById('warningPopup');
+        const display = document.getElementById('countdownDisplay');
+
+        if (popup) {
+            // Using 'flex' allows the CSS centering to work
+            popup.style.display = 'flex';
+        }
+
+        let timeLeft = 10 * 60; // 10 minute countdown
+
+        phase2Interval = setInterval(() => {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            if (display) {
+                display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            if (timeLeft <= 0) {
+               // clearInterval(phase2Interval);
+                handleLogout();
+            }
+        }, 1000);
     }
 
-    function redirectToLogin() {
-        handleLogout();
+    // LISTENER: Detects mouse movement to clear the popup
+    window.onload = resetAllTimers;
+    document.onmousemove = resetAllTimers;
+    document.onkeypress = resetAllTimers;
+    document.onclick = resetAllTimers;
+
+    function handleLogout() {
+        localStorage.removeItem("username");
+        window.location.href = "homepage.html";
     }
-
-    // These lines are CRITICAL - they reset the timer when you move or type
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.onclick = resetTimer;
-
     // --- 2. YOUR ORIGINAL FUNCTIONS (NO CHANGES) ---
     function searchLocation(favLocation) {
         const label = document.getElementById('userLocationLabel');
