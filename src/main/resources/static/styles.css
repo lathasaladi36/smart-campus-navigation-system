@@ -255,6 +255,22 @@ input[type="radio"]{
     display: block;
 }
 
+#favorite-buttons-container button {
+    background-color: black; /* Dark background */
+    color: white;              /* White text */
+    text-align: left;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;                          /* Full width like a list */
+}
+
+#favorite-buttons-container button:hover {
+    background-color: #00853E;
+    color: white;
+}
 
 /*Nav page layout*/
 .feature-container {
