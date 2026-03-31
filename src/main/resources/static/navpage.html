@@ -49,8 +49,8 @@
         <!--Favorites Tile-->
         <div class="tile" id="favoritesSection" style="display: none;">
             <h4>Favorites</h4>
-            <div id="favorite-buttons-container" class="favorite-buttons">
-            </div>
+            <ul id="favorite-buttons-container">
+            </ul>
         </div>
 
         <!--Shuttle Schedule Tile-->
@@ -230,12 +230,10 @@
         container.innerHTML = "";
         if (topThree.length > 0) {
             topThree.forEach(loc => {
-                const btn = document.createElement("button");
-                // Now loc.name will correctly refer to "Willis Library"
-                btn.innerHTML = `${loc.name}`;
-                btn.className = "favorite-btn";
-                btn.onclick = () => searchLocation(loc.name);
-                container.appendChild(btn);
+                const li = document.createElement("li");
+                li.innerHTML = `${loc.name}`;
+                li.onclick = () => searchLocation(loc.name);
+                container.appendChild(li);
             });
             section.style.display = "block";
         } else {
@@ -243,7 +241,7 @@
         }
     }
 
-    // --- 2. YOUR ORIGINAL FUNCTIONS (NO CHANGES) ---
+    // --- 2. Location Search Function ---
     function searchLocation(favLocation) {
         const label = document.getElementById('userLocationLabel');
         label.style.display = "none"; // Hide the label when looking for a building

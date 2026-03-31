@@ -255,21 +255,29 @@ input[type="radio"]{
     display: block;
 }
 
-#favorite-buttons-container button {
-    background-color: black; /* Dark background */
-    color: white;              /* White text */
-    text-align: left;
-    padding: 12px;
-    margin-bottom: 8px;
-    display: block;
-    cursor: pointer;
-    text-decoration: none;
-    width: 100%;                          /* Full width like a list */
+/* Favorites Section List Styling */
+#favorite-buttons-container {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    list-style: none; /* Removes bullet points */
+    font-size: 14px;
 }
 
-#favorite-buttons-container button:hover {
-    background-color: #00853E;
+#favorite-buttons-container li {
+    border-bottom: 1px solid transparent; /* Subtle green divider */
+    cursor: pointer;
     color: white;
+    display: flex;
+    align-items: center;
+}
+
+#favorite-buttons-container li:hover {
+    background: rgba(0, 133, 62, 0.2); /* Light UNT green tint on hover */
+}
+
+#favorite-buttons-container li:last-child {
+    border-bottom: none;
 }
 
 /*Nav page layout*/
