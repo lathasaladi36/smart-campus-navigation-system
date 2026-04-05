@@ -1,200 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bus Routes</title>
-    <link rel="stylesheet"  href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNT Transit | Smart Campus Navigation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* 1. GLOBAL BACKGROUND  */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: url('1.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 2. APP CONTAINER  */
+        .app-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            width: 100%;
+            background: transparent;
+        }
+
+        /* 3. FROSTED GLASS PANELS  */
+        .panel-left, .panel-right {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.3) !important; /* Low opacity for better flow */
+            backdrop-filter: blur(8px); /* Stronger blur for a professional glass look */
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-right {
+            width: 350px;
+            display: none; /* Controlled by JS */
+            overflow-y: auto;
+        }
+
+        /* 4. TEXT LEGIBILITY  */
+        .panel-left h2, .panel-right h2 {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* 5. MAP WRAPPER  */
+        .map-center {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .map-wrapper {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            background: white; /* Map stays opaque for clarity */
+        }
+
+        /* CORE UTILITIES  */
+        :root { --unt-green: #00853E; --transit-blue: #007aff; --bg-gray: #f0f2f5; --stop-grey: #cbd5e0; }
+        .top-nav { height: 60px; background: var(--unt-green); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; color: white; z-index: 1000; position: relative; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .search-container { background: var(--unt-green); border-radius: 16px; padding: 18px; color: white; }
+        .input-box { background: white; border-radius: 8px; display: flex; align-items: center; padding: 10px; margin-bottom: 8px; }
+        .input-box input { border: none; outline: none; width: 100%; font-size: 14px; margin-left: 10px; color: #333; }
+        .action-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: white; color: var(--unt-green); font-weight: 800; cursor: pointer; }
+        #customMap { width: 100%; height: 100%; }
+        .shuttle-card { border: 1px solid #edf2f7; border-radius: 12px; padding: 15px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; background: white; }
+        .stop-list { margin-top: 10px; border-left: 2px solid #e2e8f0; padding-left: 20px; position: relative; }
+        .stop-item { font-size: 13px; margin-bottom: 12px; color: #718096; position: relative; transition: 0.3s; }
+        .stop-item::before { content: ''; position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #e2e8f0; border: 2px solid white; z-index: 1; }
+        .stop-past { color: #a0aec0; }
+        .stop-past::before { background: #a0aec0; }
+        .stop-active { color: var(--unt-green); font-weight: 700; }
+        .stop-active::before { background: var(--unt-green); box-shadow: 0 0 8px var(--unt-green); }
+        .next-service { font-size: 11px; color: #4a5568; background: #edf2f7; padding: 4px 8px; border-radius: 4px; margin-top: 5px; display: inline-block; }
+    </style>
 </head>
-<body>
-<div id="warningPopup" class="modal-overlay">
-    <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 4px solid #00853E; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 400px; color: black;">
-        <h2 style="color: #d9534f; margin: 0; font-size: 28px;">Session Warning</h2>
-        <p style="margin: 5px 0;">You have been inactive for a while.</p>
-        <p style="color: #666; font-size: 14px; margin: 0;">Logging out in:</p>
-        <h1 id="countdownDisplay" style="color: #00853E; margin: 10px 0; font-size: 48px;">10:00</h1>
-        <button onclick="resetAllTimers()" class="help-button" style="width: auto; padding: 12px 30px;">
-            I'm Still Here
-        </button>
+
+<div class="top-nav">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <a href="navpage.html" style="color: white; text-decoration: none; font-size: 1.8rem; cursor: pointer;">&#8592;</a>
+        <h2 id="userGreeting" style="margin: 0; font-size: 1.3rem; font-weight: 500;">Loading...</h2>
     </div>
-</div>
-<div id="customAlertModal" class="modal">
-    <div class="modal-content" style="text-align: center; border: 3px solid #00853E;">
-        <h3 id="alertTitle" style="color: #00853E; margin-top: 0;">Notification</h3>
-        <p id="alertMessage"></p>
-        <button onclick="closeCustomAlert()" class="help-button" style="margin-top: 15px;">OK</button>
-    </div>
-</div>
-<div class="header">
-    <h2 id="userGreeting">Signed in User</h2>
-    <div class="nav">
-        <a href="#" class="help-button" onclick="handleLogout()">Logout</a>
-        <a href="https://transportation.unt.edu/index.html" class="help-button"
-           target="_blank">Contact</a>
+    <div class="nav-links">
+        <!--<a href="navpage.html">Navigation</a>-->
+        <a href="homepage.html" onclick="localStorage.clear();">Logout</a>
     </div>
 </div>
 
-<div class="feature-container">
+<div class="app-container">
+    <div class="panel-left">
+        <h2>Plan Your Trip</h2>
+        <div class="search-container">
+            <div class="input-box"><span>⦿</span><input list="locations" id="startLoc" value="Current Location"></div>
+            <div class="input-box"><span>📍</span><input list="locations" id="endLoc" placeholder="To..."></div>
+            <button class="action-btn" onclick="filterShuttles()">Show Shuttle Buses</button>
+        </div>
+        <datalist id="locations">
+            <option value="University Union">
+            <option value="Discovery Park">
+            <option value="Willis Library">
+            <option value="Victory Hall">
+            <option value="EESAT Building">
+        </datalist>
+    </div>
 
-    <div class="left-panel">
+    <div class="map-center"><div class="map-wrapper"><div id="customMap"></div></div></div>
 
-        <!--Campus Toggle & other Tiles-->
-        <div class="tile">
+    <div class="panel-right" id="shuttlePanel">
+        <h2>Live Shuttles</h2>
 
-            <h4>Campus Selection</h4>
-            <div class="Campus-Select">
-                <button onclick="switchCampus('main')">Main Campus</button>
-                <button onclick="switchCampus('discovery')">Discovery Park</button>
+        <div class="shuttle-card" id="card-DP" onclick="startTracking('DP')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div><span style="background:var(--unt-green); color:white; padding:4px 8px; border-radius:4px; font-size:12px;">DP</span> <strong>DP Express</strong></div>
+                <div style="color: var(--unt-green); font-weight: 700;">4 min</div>
+            </div>
+            <div class="next-service">Next Service: 19 min</div>
+            <div class="stop-list" id="dp-stops">
+                <div class="stop-item">Union Transfer</div>
+                <div class="stop-item">Victory Hall</div>
+                <div class="stop-item">West Hall</div>
+                <div class="stop-item">Discovery Park</div>
             </div>
         </div>
 
-        <div class="tile">
-            <h4></h4>
-            <ul style="list-style: none; padding:0; font-size: 14px;">
-                <li>
-                    <a href="navpage.html"
-                       target="_blank"
-                       style="color: inherit; text-decoration: none;">
-                        Return to Nav Page
-                    </a>
-                </li>
-        </div>
-
-
-
-    </div>
-
-    <div class="right-box" style="width: 95%;">
-        <div class="search-box">
-            <h3>Bus Route</h3>
-            <div style="width: 110%;">
-                <input type="text" id="locationInput" list="unt-locations" placeholder="Enter a location to search">
-                <datalist id="unt-locations">
-                    <option value="Willis Library, UNT">
-                    <option value="Discovery Park, UNT">
-                    <option value="University Union, UNT">
-                    <option value="Eagle Student Services Center, UNT">
-                    <option value="Coliseum, UNT">
-                    <option value="Pohl Recreation Center, UNT">
-                </datalist>
-                <button onclick="searchLocation()">Search</button>
-                <button onclick="clearSearch()">Clear</button>
+        <div class="shuttle-card" id="card-MG" onclick="startTracking('MG')">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div><span style="background:#4a5568; color:white; padding:4px 8px; border-radius:4px; font-size:12px;">MG</span> <strong>Mean Green</strong></div>
+                <div style="color: var(--unt-green); font-weight: 700;">8 min</div>
+            </div>
+            <div class="next-service">Next Service: 23 min</div>
+            <div class="stop-list" id="mg-stops">
+                <div class="stop-item">Willis Library</div>
+                <div class="stop-item">Kerr Hall</div>
+                <div class="stop-item">EESAT Building</div>
+                <div class="stop-item">Union Circle</div>
             </div>
         </div>
-
-<!--        <div class="map-box">-->
-<!--            <iframe id="mapFrame" src="https://maps.google.com/maps?q=University+of+North+Texas&output=embed" allowfullscreen></iframe>-->
-<!--        </div>-->
-
-        <div class="map-box" style="position: relative;">
-            <div id="mapWrapper" style="position: relative; width: 100%; height: 100%;">
-
-                <div id="userLocationLabel" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -160%); background: white; color: #00853E; padding: 5px 12px; border-radius: 20px; border: 2px solid #00853E; font-weight: bold; z-index: 10; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 13px;">
-                     You Are Here
-                    <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 7px solid white;"></div>
-                </div>
-
-                <iframe id="mapFrame" src="about:blank" width="100%" height="100%" style="border:0;" allowfullscreen></iframe>
-            </div>
-        </div>
-
     </div>
 </div>
 
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // --- 1. TIMER LOGIC (1 MINUTE FOR TESTING) ---
-    let phase1Timer;
-    let phase2Interval;
-    const PHASE_1_TIME = 1 * 60 * 1000; // 1 Minute testing duration
-
-    function resetAllTimers() {
-        // 1. HIDEP THE POPUP IMMEDIATELY
-        const popup = document.getElementById('warningPopup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-
-        // 2. CLEAR ALL CLOCKS
-        clearTimeout(phase1Timer);
-        clearInterval(phase2Interval);
-
-        // 3. RESTART THE SILENT WAIT
-        phase1Timer = setTimeout(startPhase2Countdown, PHASE_1_TIME);
-        console.log("Activity detected: Popup hidden and timer reset.");
-    }
-
-    function startPhase2Countdown() {
-        const popup = document.getElementById('warningPopup');
-        const display = document.getElementById('countdownDisplay');
-
-        if (popup) {
-            // Using 'flex' allows the CSS centering to work
-            popup.style.display = 'flex';
-        }
-
-        let timeLeft = 10 * 60; // 10 minute countdown
-
-        phase2Interval = setInterval(() => {
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            if (display) {
-                display.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }
-
-            if (timeLeft <= 0) {
-               // clearInterval(phase2Interval);
-                handleLogout();
-            }
-        }, 1000);
-    }
-
-    // LISTENER: Detects mouse movement to clear the popup
-    window.onload = resetAllTimers;
-    document.onmousemove = resetAllTimers;
-    document.onkeypress = resetAllTimers;
-    document.onclick = resetAllTimers;
-
-    function handleLogout() {
-        localStorage.removeItem("username");
-        window.location.href = "homepage.html";
-    }
-    // --- 2. YOUR ORIGINAL FUNCTIONS (NO CHANGES) ---
-    function searchLocation(favLocation) {
-        const label = document.getElementById('userLocationLabel');
-        label.style.display = "none"; // Hide the label when looking for a building
-
-        const input = document.getElementById('locationInput');
-        const location = favLocation || input.value;
-
-        if(location && location.trim() !== "") {
-            const mapFrame = document.getElementById('mapFrame');
-            const query = encodeURIComponent(location + " UNT Denton");
-            const embedUrl = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=addr&output=embed`;
-            mapFrame.src = embedUrl;
-        } else {
-            alert("Please enter a location to search.");
-        }
-    }
-
-    function clearSearch() {
-        const input = document.getElementById('locationInput');
-        input.value = "";
-        // Resetting shows the user where they are currently standing
-        showUserLocation();
-    }
-
-    function switchCampus(campus) {
-        document.getElementById('userLocationLabel').style.display = "none";
-
-        const mapFrame = document.getElementById('mapFrame');
-        if(campus === 'main') {
-           const address = encodeURIComponent("Union Campus, 1155 Union Cir, Denton, TX 76205");
-           mapFrame.src = `https://maps.google.com/maps?q=${address}&t=&z=16&ie=UTF8&iwloc=addr&output=embed`;
-        } else if(campus === 'discovery') {
-            mapFrame.src = "https://www.google.com/maps?q=Discovery+Park+UNT+Denton&output=embed";
-        }
-    }
-
     document.addEventListener("DOMContentLoaded", function() {
         const savedName = localStorage.getItem("username");
         if (savedName) {
@@ -202,36 +163,83 @@
         }
         showUserLocation();
     });
+    // 1. FILTER LOGIC: Prevents showing unnecessary shuttles
+    function filterShuttles() {
+        const destination = document.getElementById('endLoc').value;
+        const panel = document.getElementById('shuttlePanel');
+        const dpCard = document.getElementById('card-DP');
+        const mgCard = document.getElementById('card-MG');
 
-    function handleLogout() {
-        localStorage.removeItem("username");
-        window.location.href = "homepage.html";
-    }
+        panel.style.display = 'block';
 
-    // Function to center the map on the user's current GPS coordinates
-    function showUserLocation() {
-        const mapFrame = document.getElementById('mapFrame');
-        const label = document.getElementById('userLocationLabel');
-
-        // Retrieve coordinates stored from the homepage
-        const lat = localStorage.getItem("userLat");
-        const lon = localStorage.getItem("userLon");
-
-        if (lat && lon) {
-            // Show the custom "You Are Here" label
-            label.style.display = "block";
-
-            // Center the map and drop the pin exactly on those coordinates
-            const url = `https://maps.google.com/maps?q=${lat},${lon}&q=${lat},${lon}&z=18&output=embed`;
-            mapFrame.src = url;
+        if (destination === "Discovery Park") {
+            dpCard.style.display = 'block';
+            mgCard.style.display = 'none';
+        } else if (destination === "University Union") {
+            // Both shuttles appear because both stop at the Union area
+            dpCard.style.display = 'block';
+            mgCard.style.display = 'block';
+        } else if (destination === "Willis Library" || destination === "EESAT Building") {
+            dpCard.style.display = 'none';
+            mgCard.style.display = 'block';
         } else {
-            // If they denied on homepage, hide label and show Main Campus default
-            label.style.display = "none";
-            mapFrame.src = "https://maps.google.com/maps?q=University+of+North+Texas&t=&z=16&ie=UTF8&iwloc=&output=embed";
-
+            dpCard.style.display = 'block';
+            mgCard.style.display = 'block';
         }
     }
 
+    // 2. MAP INITIALIZATION
+    var map = L.map('customMap').setView([33.2108, -97.1459], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    const routes = {
+        'DP': [[33.2098, -97.1466], [33.2100, -97.1550], [33.2140, -97.1550], [33.2540, -97.1530]],
+        'MG': [[33.2105, -97.1475], [33.2115, -97.1465], [33.2125, -97.1455], [33.2135, -97.1445]]
+    };
+
+    var busIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+        iconSize: [35, 35],
+        iconAnchor: [17, 17]
+    });
+    var busMarker, routeLine, moveInterval;
+
+    function startTracking(id) {
+        if (moveInterval) clearInterval(moveInterval);
+        if (busMarker) map.removeLayer(busMarker);
+        if (routeLine) map.removeLayer(routeLine);
+
+        const path = routes[id];
+        routeLine = L.polyline(path, { color: '#007aff', weight: 4 }).addTo(map);
+        busMarker = L.marker(path[0], {icon: busIcon}).addTo(map);
+        map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+
+        let step = 0, segment = 0, totalSteps = 800;
+
+        moveInterval = setInterval(() => {
+            let start = path[segment], end = path[(segment + 1) % path.length];
+            let lat = start[0] + (end[0] - start[0]) * (step / totalSteps);
+            let lng = start[1] + (end[1] - start[1]) * (step / totalSteps);
+            busMarker.setLatLng([lat, lng]);
+
+            updateProgressDot(id, segment);
+
+            step++;
+            if (step > totalSteps) {
+                step = 0;
+                segment = (segment + 1) % (path.length - 1);
+            }
+        }, 80);
+    }
+
+    function updateProgressDot(routeId, currentSegment) {
+        const stops = document.querySelectorAll(`#${routeId.toLowerCase()}-stops .stop-item`);
+        stops.forEach((stop, i) => {
+            stop.classList.remove('stop-active', 'stop-past');
+            if (i < currentSegment) stop.classList.add('stop-past');
+            else if (i === currentSegment) stop.classList.add('stop-active');
+        });
+    }
 </script>
 </body>
 </html>
