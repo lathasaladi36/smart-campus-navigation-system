@@ -255,6 +255,30 @@ input[type="radio"]{
     display: block;
 }
 
+/* Favorites Section List Styling */
+#favorite-buttons-container {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    list-style: none; /* Removes bullet points */
+    font-size: 14px;
+}
+
+#favorite-buttons-container li {
+    border-bottom: 1px solid transparent; /* Subtle green divider */
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+#favorite-buttons-container li:hover {
+    background: rgba(0, 133, 62, 0.2); /* Light UNT green tint on hover */
+}
+
+#favorite-buttons-container li:last-child {
+    border-bottom: none;
+}
 
 /*Nav page layout*/
 .feature-container {

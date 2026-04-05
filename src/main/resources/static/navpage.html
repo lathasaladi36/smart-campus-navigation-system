@@ -47,12 +47,9 @@
         </div>
 
         <!--Favorites Tile-->
-        <div class="tile">
+        <div class="tile" id="favoritesSection" style="display: none;">
             <h4>Favorites</h4>
-            <ul style="list-style: none; padding:0; font-size: 14px;">
-                <li onclick="searchLocation('Willis Library')" style="cursor: pointer;" >Willis Library</li>
-                <li onclick="searchLocation('UNT Union')" style="cursor: pointer;" >UNT Union</li>
-                <li onclick="searchLocation('UNT Rec Center')" style="cursor: pointer;" >Recreation Center</li>
+            <ul id="favorite-buttons-container">
             </ul>
         </div>
 
@@ -204,21 +201,77 @@
 
     function handleLogout() {
         localStorage.removeItem("username");
+        localStorage.removeItem("locationFrequency"); // Reset frequencies
         window.location.href = "homepage.html";
     }
-    // --- 2. YOUR ORIGINAL FUNCTIONS (NO CHANGES) ---
+
+    function checkFavoritesVisibility() {
+        const stats = JSON.parse(localStorage.getItem("locationStats") || "{}");
+        const container = document.getElementById('favorite-buttons-container');
+        const section = document.getElementById('favoritesSection');
+
+        if (!container || !section) return;
+
+        // 1. Get all locations that have at least 4 searches
+        let eligible = Object.keys(stats)
+            .filter(name => stats[name].count >= 4)
+            .map(name => ({
+                name: name,
+                lastSearched: stats[name].lastSearched
+            }));
+
+        // 2. Sort by 'lastSearched' (Descending) and take only the TOP 3
+        // This automatically "deletes" the oldest one from the UI view
+        let topThree = eligible
+            .sort((a, b) => b.lastSearched - a.lastSearched)
+            .slice(0, 3);
+
+        // 3. Render the buttons
+        container.innerHTML = "";
+        if (topThree.length > 0) {
+            topThree.forEach(loc => {
+                const li = document.createElement("li");
+                li.innerHTML = `${loc.name}`;
+                li.onclick = () => searchLocation(loc.name);
+                container.appendChild(li);
+            });
+            section.style.display = "block";
+        } else {
+            section.style.display = "none";
+        }
+    }
+
+    // --- 2. Location Search Function ---
     function searchLocation(favLocation) {
         const label = document.getElementById('userLocationLabel');
         label.style.display = "none"; // Hide the label when looking for a building
 
         const input = document.getElementById('locationInput');
-        const location = favLocation || input.value;
+        const location = favLocation || input.value.trim();
 
-        if(location && location.trim() !== "") {
+        if(location) {
             const mapFrame = document.getElementById('mapFrame');
             const query = encodeURIComponent(location + " UNT Denton");
             const embedUrl = `https://maps.google.com/maps?q=${query}&t=&z=16&ie=UTF8&iwloc=addr&output=embed`;
             mapFrame.src = embedUrl;
+
+            // Get existing data or an empty object
+            let stats = JSON.parse(localStorage.getItem("locationStats") || "{}");
+
+            // Update count and record current time as 'lastSearched'
+            if (!stats[location]) {
+                stats[location] = { count: 0, lastSearched: 0 };
+            }
+            stats[location].count += 1;
+            stats[location].lastSearched = Date.now();
+
+            localStorage.setItem("locationStats", JSON.stringify(stats));
+
+            // Refresh the UI immediately
+            if (!location) input.value = "";
+            checkFavoritesVisibility();
+
+            document.getElementById('userLocationLabel').style.display = "none";
         } else {
             alert("Please enter a location to search.");
         }
@@ -248,6 +301,7 @@
         if (savedName) {
             document.getElementById("userGreeting").innerText = "Hello, " + savedName;
         }
+        checkFavoritesVisibility();
         showUserLocation();
     });
 
