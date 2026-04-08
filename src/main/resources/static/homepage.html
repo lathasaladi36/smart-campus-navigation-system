@@ -338,10 +338,10 @@ function closeCustomAlert() {
     }, 2000);
        } else {
            const errorMsg = await response.text();
-           alert("Login Failed: " + errorMsg);
+           showCustomAlert("Login Failed: " + errorMsg, "Authentication Error");
        }
    } catch (error) {
-       alert("Server error. Check your connection to the Spring Boot backend.");
+       showCustomAlert("Server error. Check your connection to the Spring Boot backend.", "System Error");
    }
 }
 

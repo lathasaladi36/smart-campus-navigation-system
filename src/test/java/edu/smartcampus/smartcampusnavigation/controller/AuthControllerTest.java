@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class AuthControllerTest {
@@ -47,6 +48,7 @@ public class AuthControllerTest {
         Student savedStudent = new Student();
         savedStudent.setStudentId("S101");
         savedStudent.setPassword("pass123");
+        savedStudent.setFullName("Madhavi Latha");
 
         Student loginRequest = new Student();
         loginRequest.setStudentId("S101");
@@ -54,11 +56,13 @@ public class AuthControllerTest {
 
         when(studentRepository.findById("S101")).thenReturn(Optional.of(savedStudent));
 
-        ResponseEntity<String> response = authController.login(loginRequest);
+        ResponseEntity<?> response = authController.login(loginRequest);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Success", response.getBody()); // Matches the "Success" string used for redirect
+        assertTrue(response.getBody() instanceof Student);
+        assertEquals("S101", ((Student) response.getBody()).getStudentId());
     }
+
     @Test
     void testRegister_UserAlreadyExists() {
         Student student = new Student();
@@ -70,22 +74,24 @@ public class AuthControllerTest {
         ResponseEntity<String> response = authController.register(student);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Student ID already exists!", response.getBody()); // Covers the if-block
+        assertEquals("Student ID already exists!", response.getBody());
     }
+
     @Test
     void testLogin_InvalidCredentials() {
         Student loginRequest = new Student();
         loginRequest.setStudentId("S999");
         loginRequest.setPassword("wrong-pass");
 
-        // Force mock to return an empty optional (user not found)
         when(studentRepository.findById("S999")).thenReturn(Optional.empty());
 
-        ResponseEntity<String> response = authController.login(loginRequest);
+
+        ResponseEntity<?> response = authController.login(loginRequest);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertEquals("Invalid credentials", response.getBody()); // Covers the failure path
+        assertEquals("Invalid credentials", response.getBody());
     }
+
     @Test
     void testLogin_Failure() {
         // This test will cover the "Invalid credentials" line in AuthController
@@ -95,9 +101,11 @@ public class AuthControllerTest {
 
         when(studentRepository.findById("nonexistent")).thenReturn(Optional.empty());
 
-        ResponseEntity<String> response = authController.login(wrongRequest);
+
+        ResponseEntity<?> response = authController.login(wrongRequest);
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
+
     @Test
     void testRegister_DatabaseException() {
         Student student = new Student();
@@ -109,8 +117,9 @@ public class AuthControllerTest {
         ResponseEntity<String> response = authController.register(student);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Database Error", response.getBody()); // This covers the catch block
+        assertEquals("Database Error", response.getBody());
     }
+
     @Test
     void testLogin_DatabaseException() {
         Student request = new Student();
@@ -119,11 +128,13 @@ public class AuthControllerTest {
         // Force the repository to throw an exception when searching for the student
         when(studentRepository.findById(anyString())).thenThrow(new RuntimeException("Internal Error"));
 
-        ResponseEntity<String> response = authController.login(request);
+
+        ResponseEntity<?> response = authController.login(request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Server Error", response.getBody()); // This covers the second catch block
+        assertEquals("Server Error", response.getBody());
     }
+
     @Test
     void testLogin_WrongPassword() {
         // 1. Setup a "Saved" student in our mock database
@@ -140,12 +151,13 @@ public class AuthControllerTest {
         when(studentRepository.findById("S123")).thenReturn(Optional.of(savedStudent));
 
         // 4. Run the login (Condition 2: password.equals() will be FALSE)
-        ResponseEntity<String> response = authController.login(loginRequest);
+        ResponseEntity<?> response = authController.login(loginRequest);
 
         // 5. Verify it returns Unauthorized
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("Invalid credentials", response.getBody());
     }
+
     @Test
     void testVerifyEmail_Success() {
         // 1. Arrange: Create a student and mock the repository to return it
